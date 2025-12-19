@@ -1,0 +1,149 @@
+<template>
+  <div class="page">
+    <!-- 顶部区域 -->
+    <div class="top-section">
+      <image class="top-bg" src="{{topBgImage}}"></image>
+      <div class="content-wrapper">
+        <div class="logo-row">
+          <image class="logo" src="{{logoImage}}"></image>
+        </div>
+        <image class="banner" src="{{bannerImage}}"></image>
+      </div>
+    </div>
+
+    <!-- 分类区域 -->
+    <div class="category-section">
+      <div class="category-item" for="{{categoryList}}">
+        <image class="category-img" src="{{$item.image}}"></image>
+        <text class="category-name">{{$item.name}}</text>
+      </div>
+    </div>
+
+    <!-- 列表标题 -->
+    <text class="section-title">最新壁纸</text>
+
+    <!-- 壁纸列表 -->
+    <list class="wallpaper-list">
+      <list-item type="wallpaper" class="wallpaper-item" for="{{wallpaperList}}">
+        <div class="wallpaper-card">
+          <text>壁纸占位</text>
+        </div>
+      </list-item>
+    </list>
+  </div>
+</template>
+
+<script>
+export default {
+  private: {
+    topBgImage: '/assets/img/shouyedingbg.png',
+    logoImage: '/assets/img/logo-1.png',
+    bannerImage: '/assets/img/banner-1.png',
+    categoryList: [
+      { name: '动漫', image: '/assets/img/DONGMAN.png' },
+      { name: '人物', image: '/assets/img/RENWU.png' },
+      { name: '萌宠', image: '/assets/img/CHOONG.png' },
+      { name: '自然', image: '/assets/img/ZIRAN.png' }
+    ],
+    wallpaperList: [1, 2, 3, 4, 5, 6]
+  }
+}
+</script>
+
+<style>
+  .page {
+    flex-direction: column;
+    background-color: #ffffff;
+  }
+
+  .top-section {
+    flex-direction: column;
+    position: relative;
+    width: 100%;
+  }
+
+  .top-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 400px; /* 根据实际图片调整 */
+    resize-mode: cover;
+  }
+
+  .content-wrapper {
+    flex-direction: column;
+    padding: 0 30px;
+  }
+
+  .logo-row {
+    justify-content: flex-end;
+    margin-top: 50px;
+    margin-bottom: 20px;
+  }
+
+  .logo {
+    width: 200px;
+    height: 60px;
+    object-fit: contain;
+  }
+
+  .banner {
+    width: 100%;
+    height: 350px;
+    border-radius: 20px;
+    object-fit: cover;
+  }
+
+  .category-section {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 40px 30px;
+  }
+
+  .category-item {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .category-img {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 15px;
+    border-radius: 20px;
+  }
+
+  .category-name {
+    font-size: 28px;
+    color: #333333;
+    font-weight: bold;
+  }
+
+  .section-title {
+    font-size: 36px;
+    font-weight: bold;
+    color: #000000;
+    margin-left: 30px;
+    margin-bottom: 20px;
+  }
+
+  .wallpaper-list {
+    flex: 1;
+    columns: 2;
+    padding: 0 20px;
+  }
+
+  .wallpaper-item {
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  .wallpaper-card {
+    width: 100%;
+    height: 500px;
+    background-color: #f0f0f0;
+    border-radius: 15px;
+    justify-content: center;
+    align-items: center;
+  }
+</style>

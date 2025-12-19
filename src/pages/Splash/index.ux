@@ -1,0 +1,210 @@
+<template>
+  <div class="splash-container">
+    <image class="bg-img" src="/assets/img/loading.png"></image>
+    
+    <!-- 隐私协议弹窗 -->
+    <div class="modal_overlay" if="{{showModal}}">
+      <div class="modal_content">
+        <text class="modal_title">用户协议及隐私政策</text>
+        <div class="modal_text_wrapper">
+          <text class="modal_text">
+            <span>尊敬的用户：欢迎使用"吉顺壁纸"，在使用前请仔细阅读</span>
+            <a class="link" onclick="openPrivacy">《隐私政策》</a>
+            <span>及</span>
+            <a class="link" onclick="openAgreement">《用户协议》</a>
+            <span>，我们将严格遵守您同意的各项条款使用您的信息，以便为您提供更好的服务。点击"同意"意味着您自愿遵守《隐私政策》，我们将严格保护您的个人信息，确保信息安全。</span>
+          </text>
+        </div>
+        <div class="modal_buttons">
+          <div class="btn_primary" onclick="handleAgree">
+            <text class="btn_text_primary">同意并继续</text>
+          </div>
+          <div class="btn_secondary" onclick="handleDisagree">
+            <text class="btn_text_secondary">不同意</text>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import router from '@system.router'
+import storage from '@system.storage'
+import app from '@system.app'
+
+export default {
+  data: {
+    timer: null,
+    showModal: false
+  },
+  onInit() {
+    this.checkPrivacyAgreement()
+  },
+  checkPrivacyAgreement() {
+    storage.get({
+      key: 'hasAgreedPrivacy',
+      success: data => {
+        if (data === 'true') {
+          // 已同意，延迟跳转
+          this.startTimer()
+        } else {
+          // 未同意，显示弹窗
+          this.showModal = true
+        }
+      },
+      fail: () => {
+        this.showModal = true
+      }
+    })
+  },
+  startTimer() {
+    this.timer = setTimeout(() => {
+      this.navigateToHome()
+    }, 2000)
+  },
+  handleAgree() {
+    storage.set({
+      key: 'hasAgreedPrivacy',
+      value: 'true',
+      success: () => {
+        this.showModal = false
+        this.navigateToHome()
+      }
+    })
+  },
+  handleDisagree() {
+    console.log('用户点击不同意，退出应用')
+    app.terminate()
+  },
+  openPrivacy() {
+    router.push({
+      uri: '/pages/Webview',
+      params: {
+        url: 'https://api.51dsp.cn/index/privacy.do?pn=com.jishunclbz.jsauspicious'
+      }
+    })
+  },
+  openAgreement() {
+    router.push({
+      uri: '/pages/Webview',
+      params: {
+        url: 'https://api.51dsp.cn/index/agreement.do?pn=com.jishunclbz.jsauspicious'
+      }
+    })
+  },
+  onHide() {
+    if (this.timer) {
+      clearTimeout(this.timer)
+      this.timer = null
+    }
+  },
+  onDestroy() {
+    if (this.timer) {
+      clearTimeout(this.timer)
+      this.timer = null
+    }
+  },
+  navigateToHome() {
+    router.replace({
+      uri: '/pages/Main'
+    })
+  }
+}
+</script>
+
+<style>
+  .splash-container {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff;
+  }
+  .bg-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  /* 弹窗样式 */
+  .modal_overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+  }
+
+  .modal_content {
+    width: 860px;
+    background-color: #ffffff;
+    border-radius: 40px;
+    padding: 70px;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .modal_title {
+    font-size: 54px;
+    font-weight: bold;
+    color: #333333;
+    margin-bottom: 40px;
+  }
+
+  .modal_text_wrapper {
+    margin-bottom: 70px;
+  }
+
+  .modal_text {
+    font-size: 42px;
+    color: #666666;
+    line-height: 64px;
+  }
+
+  .link {
+    color: #FFD700;
+    text-decoration: underline;
+  }
+
+  .modal_buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn_primary {
+    width: 100%;
+    height: 120px;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    border-radius: 60px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+
+  .btn_text_primary {
+    color: #ffffff;
+    font-size: 46px;
+    font-weight: bold;
+  }
+
+  .btn_secondary {
+    width: 100%;
+    height: 120px;
+    background-color: #f5f7fa;
+    border-radius: 60px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .btn_text_secondary {
+    color: #FFD700;
+    font-size: 46px;
+    font-weight: bold;
+  }
+</style>

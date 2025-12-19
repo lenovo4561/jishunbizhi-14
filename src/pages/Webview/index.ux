@@ -1,0 +1,28 @@
+<template>
+  <div class="container">
+    <web src="{{url}}"></web>
+  </div>
+</template>
+
+<script>
+export default {
+  data: {
+    url: ''
+  },
+  onInit() {
+    this.url = this.$page.getParams().url || ''
+  }
+}
+</script>
+
+<style>
+.container {
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+web {
+  width: 100%;
+  height: 100%;
+}
+</style>

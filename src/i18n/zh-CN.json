@@ -1,0 +1,17 @@
+{
+  "message": {
+    "appName": "吉顺壁纸",
+    "phoneWallpaper": "手机壁纸",
+    "computerWallpaper": "电脑壁纸",
+    "collection": "收藏",
+    "mine": "我的",
+    "noCollection": "暂无收藏~",
+    "agree": "同意并继续",
+    "disagree": "不同意",
+    "privacyTitle": "用户协议及隐私政策",
+    "privacyContent": "尊敬的用户：欢迎使用"吉顺壁纸"，在使用前请仔细阅读",
+    "privacyPolicy": "《隐私政策》",
+    "userAgreement": "《用户协议》",
+    "privacyTip": "，我们将严格遵守您同意的各项条款使用您的信息，以便为您提供更好的服务。点击"同意"意味着您自愿遵守《隐私政策》，我们将严格保护您的个人信息，确保信息安全。"
+  }
+}

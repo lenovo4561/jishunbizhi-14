@@ -1,0 +1,14 @@
+<template>
+  <div class="page">
+    <text>我的页面</text>
+  </div>
+</template>
+
+<style>
+  .page {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+  }
+</style>

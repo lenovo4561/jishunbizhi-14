@@ -1,0 +1,178 @@
+<import name="phone-page" src="./phone_wallpaper.ux"></import>
+<import name="computer-page" src="./computer_wallpaper.ux"></import>
+<import name="collection-page" src="./collection.ux"></import>
+<import name="mine-page" src="./mine.ux"></import>
+
+<template>
+  <div class="main-page">
+    <tabs class="tabs" onchange="changeTab" index="{{currentIndex}}">
+      <tab-content class="tab-content">
+        <phone-page></phone-page>
+        <computer-page></computer-page>
+        <collection-page></collection-page>
+        <mine-page></mine-page>
+      </tab-content>
+    </tabs>
+
+    <div class="tab-bar">
+      <div class="tab-item" onclick="clickTab(0)">
+        <image class="tab-icon" src="{{currentIndex === 0 ? '/assets/img/shoujibizhi-s.png' : '/assets/img/shoujibizhi-u.png'}}"></image>
+        <text class="tab-text" style="color: {{currentIndex === 0 ? '#B25AFF' : '#888888'}}">手机壁纸</text>
+      </div>
+      <div class="tab-item" onclick="clickTab(1)">
+        <image class="tab-icon" src="{{currentIndex === 1 ? '/assets/img/diananobizhi-s.png' : '/assets/img/diananobizhi-u.png'}}"></image>
+        <text class="tab-text" style="color: {{currentIndex === 1 ? '#B25AFF' : '#888888'}}">电脑壁纸</text>
+      </div>
+      <div class="tab-item" onclick="clickTab(2)">
+        <image class="tab-icon" src="{{currentIndex === 2 ? '/assets/img/shoucang-s-4.png' : '/assets/img/shoucang-u.png'}}"></image>
+        <text class="tab-text" style="color: {{currentIndex === 2 ? '#B25AFF' : '#888888'}}">收藏</text>
+      </div>
+      <div class="tab-item" onclick="clickTab(3)">
+        <image class="tab-icon" src="{{currentIndex === 3 ? '/assets/img/mine-s.png' : '/assets/img/mine-u.png'}}"></image>
+        <text class="tab-text" style="color: {{currentIndex === 3 ? '#B25AFF' : '#888888'}}">我的</text>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import device from '@system.device'
+import app from '@system.app'
+import storage from '@system.storage'
+const $apis = require('./helper/apis').default
+
+export default {
+  private: {
+    currentIndex: 0
+  },
+  onInit() {
+    this.initUser()
+  },
+  changeTab(e) {
+    this.currentIndex = e.index
+  },
+  clickTab(index) {
+    this.currentIndex = index
+  },
+  initUser() {
+    Promise.all([
+      // 单独获取 OAID，避免受其他 ID 获取影响
+      new Promise((resolve, reject) => {
+        device.getOAID({
+          success: function (data) {
+            console.log(`获取oaid成功 ${JSON.stringify(data)}`)
+            resolve(data.oaid)
+          },
+          fail: function (data, code) {
+            console.log(`获取oaid失败 ${data} ${code}`)
+            resolve('')
+          }
+        })
+      }),
+      // 获取AndroidId
+      new Promise((resolve, reject) => {
+        if (device.getUserId) {
+          device.getUserId({
+            success: function (data) {
+              resolve(data.userId)
+            },
+            fail: function (data, code) {
+              resolve('')
+            }
+          })
+        } else {
+          device.getId({
+            type: ['user'],
+            success: function (data) {
+              resolve(data.user || '')
+            },
+            fail: function (data, code) {
+              resolve('')
+            }
+          })
+        }
+      }),
+      new Promise((resolve) => {
+        device.getInfo({
+          success: function (data) {
+            resolve(data)
+          },
+          fail: function (data, code) {
+            console.error('get device info failed:', code)
+            resolve({})
+          }
+        })
+      })
+    ]).then((results) => {
+      const oaid = results[0]
+      const androidId = results[1]
+      const deviceInfo = results[2]
+      const appInfo = app.getInfo()
+
+      const params = {
+        oaid: oaid,
+        android: androidId,
+        model: deviceInfo.model || '',
+        brand: deviceInfo.brand || '',
+        pn: appInfo.packageName || '',
+        app_version: appInfo.versionName || '',
+        os_version: deviceInfo.osVersionName || '',
+        qudao: 'vivo'
+      }
+
+      $apis.user.init(params).then((data) => {
+        console.info('User init success:', data)
+        if (data && data.user_token) {
+          storage.set({
+            key: 'user_token',
+            value: data.user_token
+          })
+        }
+      }).catch((err) => {
+        console.error('User init failed:', err)
+      })
+    })
+  }
+}
+</script>
+
+<style>
+  .main-page {
+    flex-direction: column;
+    background-color: #ffffff;
+    height: 100%;
+  }
+  .tabs {
+    flex: 1;
+  }
+  .tab-content {
+    flex: 1;
+  }
+  .tab-bar {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 140px;
+    background-color: #1E1E1E;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    padding-bottom: 10px;
+  }
+  .tab-item {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 150px;
+    height: 100%;
+  }
+  .tab-icon {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    margin-bottom: 8px;
+  }
+  .tab-text {
+    font-size: 24px;
+  }
+</style>
