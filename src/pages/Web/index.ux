@@ -1,0 +1,32 @@
+<template>
+  <div class="wrapper">
+    <text class="title">{{ title }}</text>
+    <web class="webview" src="{{url}}"></web>
+  </div>
+</template>
+
+<script>
+export default {
+  protected: {
+    url: '',
+    title: ''
+  }
+}
+</script>
+
+<style>
+.wrapper {
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.title {
+  display: none;
+}
+
+.webview {
+  flex: 1;
+  width: 100%;
+}
+</style>

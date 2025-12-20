@@ -1,0 +1,291 @@
+<template>
+  <div class="collection-page">
+    <!-- 顶部区域 -->
+    <div class="top-section">
+      <image class="top-bg" src="/widgets/assets/img/shouyedingbg.png"></image>
+      <div class="content-wrapper">
+        <div class="logo-row">
+          <text class="title">收藏</text>
+        </div>
+        <image
+          class="banner"
+          src="{{currentTab === 0 ? '/widgets/assets/img/banner-3-s.png' : '/widgets/assets/img/banner-3-s-diannao.png'}}"
+        ></image>
+      </div>
+    </div>
+
+    <div class="tabs-section">
+      <div class="tabs-box">
+        <image
+          class="tab-img"
+          src="{{currentTab === 0 ? '/widgets/assets/img/sjbz-s.png' : '/widgets/assets/img/sjbz-u.png'}}"
+          onclick="switchTab(0)"
+        ></image>
+        <image
+          class="tab-img"
+          src="{{currentTab === 1 ? '/widgets/assets/img/dnbz-s.png' : '/widgets/assets/img/dnbz-u.png'}}"
+          onclick="switchTab(1)"
+        ></image>
+      </div>
+    </div>
+
+    <div class="empty-box" if="{{!list || list.length === 0}}">
+      <image class="empty-img" src="/widgets/assets/img/kong.png"></image>
+      <text class="empty-text">暂无收藏~</text>
+    </div>
+
+    <!-- 壁纸列表 -->
+    <list
+      class="wallpaper-list"
+      columns="{{currentTab === 0 ? 2 : 1}}"
+      if="{{list && list.length > 0}}"
+    >
+      <list-item
+        class="wallpaper-item"
+        for="{{(index, item) in list}}"
+        type="wallpaper"
+      >
+        <div
+          class="{{currentTab === 0 ? 'wallpaper-card' : 'wallpaper-card-computer'}}"
+        >
+          <image class="wallpaper-image" src="{{item.src}}"></image>
+          <image
+            class="{{currentTab === 0 ? 'collect-icon' : 'collect-icon-computer'}}"
+            src="/widgets/assets/img/yishoucang.png"
+            data-index="{{index}}"
+            onclick="removeCollect"
+          ></image>
+        </div>
+      </list-item>
+    </list>
+  </div>
+</template>
+
+<script>
+import storage from '@system.storage'
+
+export default {
+  data: {
+    currentTab: 0, // 0: 手机壁纸, 1: 电脑壁纸
+    list: []
+  },
+  onInit() {
+    this.loadCollections()
+  },
+  onShow() {
+    this.loadCollections()
+  },
+  onReady() {
+    this.loadCollections()
+  },
+  // 供父组件调用的刷新方法
+  refresh() {
+    this.loadCollections()
+  },
+  switchTab(index) {
+    this.currentTab = index
+    this.loadCollections()
+  },
+  loadCollections() {
+    const storageKey =
+      this.currentTab === 0 ? 'phone_collections' : 'computer_collections'
+    storage.get({
+      key: storageKey,
+      success: data => {
+        try {
+          let collections
+          if (typeof data === 'string' && data && data.trim()) {
+            collections = JSON.parse(data)
+          } else if (
+            data &&
+            data.value &&
+            typeof data.value === 'string' &&
+            data.value.trim()
+          ) {
+            collections = JSON.parse(data.value)
+          } else if (data && data.value && typeof data.value !== 'string') {
+            collections = data.value
+          } else {
+            collections = []
+          }
+          // 过滤掉本地图片地址，只保留线上地址
+          this.list = (collections || []).filter(
+            item => item.src && !item.src.startsWith('/assets/')
+          )
+          // 强制更新视图
+          this.$forceUpdate()
+        } catch (e) {
+          console.error('Load collections error:', e)
+          this.list = []
+          this.$forceUpdate()
+        }
+      },
+      fail: () => {
+        this.list = []
+        this.$forceUpdate()
+      }
+    })
+  },
+  removeCollect(evt) {
+    if (evt.stopPropagation) {
+      evt.stopPropagation()
+    }
+    const index = evt.target.dataset.index
+    this.list.splice(index, 1)
+
+    const storageKey =
+      this.currentTab === 0 ? 'phone_collections' : 'computer_collections'
+    storage.set({
+      key: storageKey,
+      value: JSON.stringify(this.list)
+    })
+  }
+}
+</script>
+
+<style>
+.collection-page {
+  flex-direction: column;
+  background-color: #ffffff;
+  flex: 1;
+}
+
+.top-section {
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+  height: 162px;
+}
+
+.top-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 104px;
+  resize-mode: cover;
+}
+
+.content-wrapper {
+  flex-direction: column;
+  padding: 0 7px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.logo-row {
+  justify-content: center;
+  margin-top: 19px;
+  margin-bottom: 7px;
+}
+
+.title {
+  font-size: 13px;
+  color: #000000;
+  font-weight: 900;
+}
+
+.banner {
+  width: 100%;
+  height: 81px;
+  border-radius: 5px;
+  object-fit: cover;
+  margin-top: 0px;
+}
+
+.tabs-section {
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: -42px;
+}
+
+.tabs-box {
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 7px;
+}
+
+.tab-img {
+  width: 48%;
+  height: 46px;
+  object-fit: contain;
+  margin: 0;
+}
+
+.empty-box {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 19px;
+  flex: 1;
+  width: 100%;
+}
+
+.empty-img {
+  width: 93px;
+  height: 93px;
+  margin-bottom: 5px;
+  object-fit: contain;
+}
+
+.empty-text {
+  color: #999999;
+  font-size: 11px;
+}
+
+.wallpaper-list {
+  padding: 0 5px;
+  flex: 1;
+  height: 100%;
+}
+
+.wallpaper-item {
+  flex-direction: column;
+  padding: 2px;
+}
+
+.wallpaper-card {
+  width: 100%;
+  height: 148px;
+  border-radius: 5px;
+  background-color: #f0f0f0;
+  position: relative;
+}
+
+.wallpaper-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  resize-mode: cover;
+}
+
+.collect-icon {
+  position: absolute;
+  bottom: -7px;
+  right: 5px;
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
+}
+
+.wallpaper-card-computer {
+  width: 100%;
+  height: 95px;
+  border-radius: 5px;
+  background-color: #f0f0f0;
+  position: relative;
+}
+
+.collect-icon-computer {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
+}
+</style>

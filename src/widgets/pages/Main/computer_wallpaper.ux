@@ -1,0 +1,401 @@
+<template>
+  <div class="page">
+    <!-- 顶部区域 -->
+    <div class="top-section">
+      <image class="top-bg" src="{{topBgImage}}"></image>
+      <div class="content-wrapper">
+        <div class="logo-row">
+          <image class="logo" src="{{logoImage}}"></image>
+        </div>
+        <image class="banner" src="{{bannerImage}}"></image>
+      </div>
+    </div>
+
+    <!-- 分类区域 -->
+    <div class="category-section">
+      <div
+        class="category-item"
+        for="{{categoryList}}"
+        onclick="goCategoryList($item)"
+      >
+        <image class="category-img" src="{{$item.image}}"></image>
+        <text class="category-name">{{ $item.name }}</text>
+      </div>
+    </div>
+
+    <!-- 列表标题 -->
+    <div class="title-wrapper">
+      <image
+        class="title-icon"
+        src="/widgets/assets/img/zuixinbizhi.png"
+      ></image>
+    </div>
+
+    <!-- 壁纸列表 -->
+    <list class="wallpaper-list" columns="1">
+      <list-item
+        class="wallpaper-item"
+        for="{{(index, item) in wallpaperList}}"
+        type="wallpaper"
+      >
+        <div class="wallpaper-card" onclick="goToLatestList(index)">
+          <image class="wallpaper-image" src="{{item.src}}"></image>
+          <image
+            class="collect-icon"
+            src="{{item.isCollected ? '/widgets/assets/img/yishoucang.png' : '/widgets/assets/img/shoucang.png'}}"
+            data-index="{{index}}"
+            onclick="toggleCollect"
+          ></image>
+        </div>
+      </list-item>
+    </list>
+  </div>
+</template>
+
+<script>
+import router from '@system.router'
+import storage from '@system.storage'
+
+export default {
+  data: {
+    topBgImage: '/widgets/assets/img/shouyedingbg.png',
+    logoImage: '/widgets/assets/img/logo-1.png',
+    bannerImage: '/widgets/assets/img/banner-2.png',
+    categoryList: [
+      { name: '动漫', image: '/widgets/assets/img/DONGMAN-1.png' },
+      { name: '人物', image: '/widgets/assets/img/RENWU-1.png' },
+      { name: '萌宠', image: '/widgets/assets/img/CHOONG-1.png' },
+      { name: '自然', image: '/widgets/assets/img/ZIRAN-1.png' }
+    ],
+    wallpaperList: [
+      {
+        isCollected: false,
+        src: 'https://cdn.shijinzhuang.com/huayang/bz/dnbz/zx/1.jpg'
+      },
+      {
+        isCollected: false,
+        src: 'https://cdn.shijinzhuang.com/huayang/bz/dnbz/zx/2.jpg'
+      },
+      {
+        isCollected: false,
+        src: 'https://cdn.shijinzhuang.com/huayang/bz/dnbz/zx/3.jpg'
+      },
+      {
+        isCollected: false,
+        src: 'https://cdn.shijinzhuang.com/huayang/bz/dnbz/zx/4.jpg'
+      },
+      {
+        isCollected: false,
+        src: 'https://cdn.shijinzhuang.com/huayang/bz/dnbz/zx/5.jpg'
+      },
+      {
+        isCollected: false,
+        src: 'https://cdn.shijinzhuang.com/huayang/bz/dnbz/zx/6.jpg'
+      },
+      {
+        isCollected: false,
+        src: 'https://cdn.shijinzhuang.com/huayang/bz/dnbz/zx/7.jpg'
+      },
+      {
+        isCollected: false,
+        src: 'https://cdn.shijinzhuang.com/huayang/bz/dnbz/zx/8.jpg'
+      },
+      {
+        isCollected: false,
+        src: 'https://cdn.shijinzhuang.com/huayang/bz/dnbz/zx/9.jpg'
+      },
+      {
+        isCollected: false,
+        src: 'https://cdn.shijinzhuang.com/huayang/bz/dnbz/zx/10.jpg'
+      },
+      {
+        isCollected: false,
+        src: 'https://cdn.shijinzhuang.com/huayang/bz/dnbz/zx/11.jpg'
+      },
+      {
+        isCollected: false,
+        src: 'https://cdn.shijinzhuang.com/huayang/bz/dnbz/zx/12.jpg'
+      },
+      {
+        isCollected: false,
+        src: 'https://cdn.shijinzhuang.com/huayang/bz/dnbz/zx/13.jpg'
+      },
+      {
+        isCollected: false,
+        src: 'https://cdn.shijinzhuang.com/huayang/bz/dnbz/zx/14.jpg'
+      },
+      {
+        isCollected: false,
+        src: 'https://cdn.shijinzhuang.com/huayang/bz/dnbz/zx/15.jpg'
+      },
+      {
+        isCollected: false,
+        src: 'https://cdn.shijinzhuang.com/huayang/bz/dnbz/zx/16.jpg'
+      },
+      {
+        isCollected: false,
+        src: 'https://cdn.shijinzhuang.com/huayang/bz/dnbz/zx/17.jpg'
+      },
+      {
+        isCollected: false,
+        src: 'https://cdn.shijinzhuang.com/huayang/bz/dnbz/zx/18.jpg'
+      },
+      {
+        isCollected: false,
+        src: 'https://cdn.shijinzhuang.com/huayang/bz/dnbz/zx/19.jpg'
+      },
+      {
+        isCollected: false,
+        src: 'https://cdn.shijinzhuang.com/huayang/bz/dnbz/zx/20.jpg'
+      }
+    ]
+  },
+  onInit() {
+    this.loadCollectionStatus()
+  },
+  onShow() {
+    this.loadCollectionStatus()
+  },
+  loadCollectionStatus() {
+    storage.get({
+      key: 'computer_collections',
+      success: data => {
+        try {
+          let collections
+          if (typeof data === 'string' && data) {
+            collections = JSON.parse(data)
+          } else if (data && data.value) {
+            collections =
+              typeof data.value === 'string' && data.value
+                ? JSON.parse(data.value)
+                : data.value
+          } else {
+            collections = data
+          }
+          if (collections && Array.isArray(collections)) {
+            const collectedSrcs = collections.map(c => c.src)
+            this.wallpaperList.forEach(item => {
+              item.isCollected = collectedSrcs.includes(item.src)
+            })
+            this.$forceUpdate()
+          }
+        } catch (e) {
+          console.error('Load collection status error:', e)
+        }
+      },
+      fail: () => {}
+    })
+  },
+  goCategoryList(item) {
+    router.push({
+      uri: '/widgets/pages/CategoryList',
+      params: {
+        categoryName: item.name,
+        isComputer: true
+      }
+    })
+  },
+  goToLatestList(index) {
+    router.push({
+      uri: '/widgets/pages/CategoryList',
+      params: {
+        categoryName: '最新壁纸',
+        wallpaperIndex: index,
+        isComputer: true
+      }
+    })
+  },
+  toggleCollect(evt) {
+    if (evt.stopPropagation) {
+      evt.stopPropagation()
+    }
+    const index = evt.target.dataset.index
+    this.wallpaperList[index].isCollected = !this.wallpaperList[index]
+      .isCollected
+    this.saveCollections()
+  },
+  saveCollections() {
+    // 获取当前页面收藏的壁纸
+    const currentCollections = this.wallpaperList
+      .filter(item => item.isCollected)
+      .map(item => ({ src: item.src, type: 'computer' }))
+
+    // 获取当前页面所有壁纸的src
+    const currentSrcs = this.wallpaperList.map(item => item.src)
+
+    // 读取已有收藏，合并后保存
+    storage.get({
+      key: 'computer_collections',
+      success: data => {
+        let existingCollections = []
+        try {
+          if (data && typeof data === 'string' && data.trim()) {
+            existingCollections = JSON.parse(data) || []
+          } else if (
+            data &&
+            data.value &&
+            typeof data.value === 'string' &&
+            data.value.trim()
+          ) {
+            existingCollections = JSON.parse(data.value) || []
+          }
+        } catch (e) {
+          existingCollections = []
+        }
+
+        // 过滤掉当前页面的壁纸（避免重复），保留其他来源的收藏
+        const otherCollections = existingCollections.filter(
+          item => !currentSrcs.includes(item.src)
+        )
+
+        // 合并收藏
+        const mergedCollections = [...otherCollections, ...currentCollections]
+
+        console.log(
+          'Saving computer collections:',
+          mergedCollections.length,
+          mergedCollections
+        )
+        storage.set({
+          key: 'computer_collections',
+          value: JSON.stringify(mergedCollections),
+          success: () => {
+            console.log('Computer collections saved successfully')
+          },
+          fail: (data, code) => {
+            console.error('Failed to save computer collections:', code, data)
+          }
+        })
+      },
+      fail: () => {
+        storage.set({
+          key: 'computer_collections',
+          value: JSON.stringify(currentCollections)
+        })
+      }
+    })
+  }
+}
+</script>
+
+<style>
+.page {
+  flex-direction: column;
+  background-color: #ffffff;
+}
+
+.top-section {
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+  height: 127px;
+}
+
+.top-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 104px;
+  resize-mode: cover;
+}
+
+.content-wrapper {
+  flex-direction: column;
+  padding: 0 7px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.logo-row {
+  justify-content: flex-end;
+  margin-top: 25px;
+  margin-bottom: 5px;
+}
+
+.logo {
+  width: 81px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.banner {
+  width: 100%;
+  height: 81px;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+.category-section {
+  flex-direction: row;
+  justify-content: space-around;
+  padding: 5px 0px;
+  margin-top: 5px;
+}
+
+.category-item {
+  flex-direction: column;
+  align-items: center;
+  margin: 0 -2px;
+}
+
+.category-img {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 2px;
+}
+
+.category-name {
+  font-size: 10px;
+  color: #333333;
+  font-weight: 900;
+  font-family: sans-serif-black;
+}
+
+.title-wrapper {
+  padding: 5px 7px;
+  margin-top: 2px;
+}
+
+.title-icon {
+  height: 9px;
+  object-fit: contain;
+}
+
+.wallpaper-list {
+  padding: 0 5px;
+  flex: 1;
+  height: 100%;
+}
+
+.wallpaper-item {
+  flex-direction: column;
+  padding: 2px;
+}
+
+.wallpaper-card {
+  width: 100%;
+  height: 95px;
+  border-radius: 5px;
+  background-color: #f0f0f0;
+  position: relative;
+}
+
+.wallpaper-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  resize-mode: cover;
+}
+
+.collect-icon {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
+}
+</style>

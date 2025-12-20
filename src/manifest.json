@@ -29,6 +29,12 @@
     },
     {
       "name": "system.device"
+    },
+    {
+      "name": "system.media"
+    },
+    {
+      "name": "system.request"
     }
   ],
   "permissions": [
@@ -38,8 +44,8 @@
   ],
   "template/official": "demo-template",
   "config": {
-    "logLevel": "debug",
-    "designWidth": 1080
+    "logLevel": "off",
+    "designWidth": 250
   },
   "router": {
     "entry": "pages/Splash",
@@ -47,21 +53,32 @@
       "pages/Splash": {
         "component": "index"
       },
-      "pages/Main": {
+      "pages/Web": {
         "component": "index"
       },
-      "pages/Demo": {
+      "widgets/pages/Main": {
         "component": "index"
       },
-      "pages/DemoDetail": {
+      "widgets/pages/Demo": {
         "component": "index"
       },
-      "pages/Webview": {
-        "component": "index"      },
-      "pages/CategoryList": {
-        "component": "index"      }
+      "widgets/pages/DemoDetail": {
+        "component": "index"
+      },
+      "widgets/pages/Webview": {
+        "component": "index"
+      },
+      "widgets/pages/CategoryList": {
+        "component": "index"
+      }
     }
   },
+  "subpackages": [
+    {
+      "name": "widgets",
+      "resource": "widgets"
+    }
+  ],
   "display": {
     "titleBarBackgroundColor": "#f2f2f2",
     "titleBarTextColor": "#414141",
@@ -71,22 +88,25 @@
         "titleBar": false,
         "menu": false
       },
-      "pages/Main": {
+      "pages/Web": {
+        "titleBarText": "协议"
+      },
+      "widgets/pages/Main": {
         "titleBar": false,
         "menu": false
       },
-      "pages/Demo": {
+      "widgets/pages/Demo": {
         "titleBarText": "快应用示例模版",
         "menu": false
       },
-      "pages/DemoDetail": {
+      "widgets/pages/DemoDetail": {
         "titleBarText": "详情页"
       },
-      "pages/Webview": {
+      "widgets/pages/Webview": {
         "titleBar": true,
         "menu": false
       },
-      "pages/CategoryList": {
+      "widgets/pages/CategoryList": {
         "titleBar": false,
         "menu": false
       }
