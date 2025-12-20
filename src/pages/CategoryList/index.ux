@@ -1,44 +1,31 @@
 <template>
   <div class="page">
-    <!-- 顶部区域 -->
-    <div class="top-section">
-      <image class="top-bg" src="{{topBgImage}}"></image>
-      <div class="content-wrapper">
-        <div class="logo-row">
-          <image class="logo" src="{{logoImage}}"></image>
-        </div>
-        <image class="banner" src="{{bannerImage}}"></image>
-      </div>
-    </div>
+    <!-- 顶部背景 -->
+    <image class="top-bg" src="/assets/img/wodebg.png"></image>
 
-    <!-- 分类区域 -->
-    <div class="category-section">
-      <div
-        class="category-item"
-        for="{{categoryList}}"
-        onclick="goCategoryList($item)"
-      >
-        <image class="category-img" src="{{$item.image}}"></image>
-        <text class="category-name">{{ $item.name }}</text>
+    <!-- 导航栏 -->
+    <div class="navbar">
+      <div class="back-btn" onclick="goBack">
+        <image class="back-icon" src="/assets/img/back.png"></image>
       </div>
-    </div>
-
-    <!-- 列表标题 -->
-    <div class="title-wrapper">
-      <image class="title-icon" src="/assets/img/zuixinbizhi.png"></image>
+      <text class="title">{{ categoryName }}</text>
+      <div class="placeholder"></div>
     </div>
 
     <!-- 壁纸列表 -->
-    <list class="wallpaper-list" columns="2">
+    <list class="wallpaper-list" columns="{{isComputer ? 1 : 2}}">
       <list-item
         class="wallpaper-item"
         for="{{(index, item) in wallpaperList}}"
         type="wallpaper"
       >
-        <div class="wallpaper-card" onclick="openModal(index)">
+        <div
+          class="{{isComputer ? 'wallpaper-card-computer' : 'wallpaper-card'}}"
+          onclick="openModal(index)"
+        >
           <image class="wallpaper-image" src="{{item.src}}"></image>
           <image
-            class="collect-icon"
+            class="{{isComputer ? 'collect-icon-computer' : 'collect-icon'}}"
             src="{{item.isCollected ? '/assets/img/yishoucang.png' : '/assets/img/shoucang.png'}}"
             data-index="{{index}}"
             onclick="toggleCollect"
@@ -96,109 +83,59 @@ import storage from '@system.storage'
 
 export default {
   data: {
-    topBgImage: '/assets/img/shouyedingbg.png',
-    logoImage: '/assets/img/logo-1.png',
-    bannerImage: '/assets/img/banner-1.png',
+    categoryName: '分类',
+    isComputer: false,
     showModal: false,
     currentWallpaperIndex: 0,
-    categoryList: [
-      { name: '动漫', image: '/assets/img/DONGMAN.png' },
-      { name: '人物', image: '/assets/img/RENWU.png' },
-      { name: '萌宠', image: '/assets/img/CHOONG.png' },
-      { name: '自然', image: '/assets/img/ZIRAN.png' }
-    ],
-    wallpaperList: [
-      {
-        isCollected: false,
-        src: 'https://cdn.shijinzhuang.com/huayang/bz/sjbz/zx/1.jpg'
-      },
-      {
-        isCollected: false,
-        src: 'https://cdn.shijinzhuang.com/huayang/bz/sjbz/zx/2.jpg'
-      },
-      {
-        isCollected: false,
-        src: 'https://cdn.shijinzhuang.com/huayang/bz/sjbz/zx/3.jpg'
-      },
-      {
-        isCollected: false,
-        src: 'https://cdn.shijinzhuang.com/huayang/bz/sjbz/zx/4.jpg'
-      },
-      {
-        isCollected: false,
-        src: 'https://cdn.shijinzhuang.com/huayang/bz/sjbz/zx/5.jpg'
-      },
-      {
-        isCollected: false,
-        src: 'https://cdn.shijinzhuang.com/huayang/bz/sjbz/zx/6.jpg'
-      },
-      {
-        isCollected: false,
-        src: 'https://cdn.shijinzhuang.com/huayang/bz/sjbz/zx/7.jpg'
-      },
-      {
-        isCollected: false,
-        src: 'https://cdn.shijinzhuang.com/huayang/bz/sjbz/zx/8.jpg'
-      },
-      {
-        isCollected: false,
-        src: 'https://cdn.shijinzhuang.com/huayang/bz/sjbz/zx/9.jpg'
-      },
-      {
-        isCollected: false,
-        src: 'https://cdn.shijinzhuang.com/huayang/bz/sjbz/zx/10.jpg'
-      },
-      {
-        isCollected: false,
-        src: 'https://cdn.shijinzhuang.com/huayang/bz/sjbz/zx/11.jpg'
-      },
-      {
-        isCollected: false,
-        src: 'https://cdn.shijinzhuang.com/huayang/bz/sjbz/zx/12.jpg'
-      },
-      {
-        isCollected: false,
-        src: 'https://cdn.shijinzhuang.com/huayang/bz/sjbz/zx/13.jpg'
-      },
-      {
-        isCollected: false,
-        src: 'https://cdn.shijinzhuang.com/huayang/bz/sjbz/zx/14.jpg'
-      },
-      {
-        isCollected: false,
-        src: 'https://cdn.shijinzhuang.com/huayang/bz/sjbz/zx/15.jpg'
-      },
-      {
-        isCollected: false,
-        src: 'https://cdn.shijinzhuang.com/huayang/bz/sjbz/zx/16.jpg'
-      },
-      {
-        isCollected: false,
-        src: 'https://cdn.shijinzhuang.com/huayang/bz/sjbz/zx/17.jpg'
-      },
-      {
-        isCollected: false,
-        src: 'https://cdn.shijinzhuang.com/huayang/bz/sjbz/zx/18.jpg'
-      },
-      {
-        isCollected: false,
-        src: 'https://cdn.shijinzhuang.com/huayang/bz/sjbz/zx/19.jpg'
-      },
-      {
-        isCollected: false,
-        src: 'https://cdn.shijinzhuang.com/huayang/bz/sjbz/zx/20.jpg'
-      }
-    ]
+    wallpaperList: []
   },
   onInit() {
+    console.info('CategoryList page init with name:', this.categoryName)
+    this.initWallpaperList()
     this.loadCollectionStatus()
+    if (this.wallpaperIndex !== undefined && this.wallpaperIndex !== null) {
+      setTimeout(() => {
+        this.openModal(this.wallpaperIndex)
+      }, 100)
+    }
+  },
+  initWallpaperList() {
+    const categoryMap = {
+      动漫: 'dm',
+      人物: 'rw',
+      萌宠: 'mc',
+      自然: 'zr',
+      最新壁纸: 'zx'
+    }
+
+    const categoryKey = categoryMap[this.categoryName]
+    if (categoryKey) {
+      const wallpaperType = this.isComputer ? 'dnbz' : 'sjbz'
+      const baseUrl = `https://cdn.shijinzhuang.com/huayang/bz/${wallpaperType}/${categoryKey}/`
+      this.wallpaperList = []
+      for (let i = 1; i <= 20; i++) {
+        this.wallpaperList.push({
+          isCollected: false,
+          src: `${baseUrl}${i}.jpg`
+        })
+      }
+    } else {
+      // 默认数据
+      this.wallpaperList = [
+        { isCollected: false, src: '/assets/img/banner-1.png' },
+        { isCollected: false, src: '/assets/img/banner-2.png' }
+      ]
+    }
   },
   onShow() {
     this.loadCollectionStatus()
   },
   loadCollectionStatus() {
+    const storageKey = this.isComputer
+      ? 'computer_collections'
+      : 'phone_collections'
     storage.get({
-      key: 'phone_collections',
+      key: storageKey,
       success: data => {
         try {
           let collections
@@ -226,22 +163,8 @@ export default {
       fail: () => {}
     })
   },
-  goCategoryList(item) {
-    router.push({
-      uri: 'pages/CategoryList',
-      params: {
-        categoryName: item.name
-      }
-    })
-  },
-  goToLatestList(index) {
-    router.push({
-      uri: 'pages/CategoryList',
-      params: {
-        categoryName: '最新壁纸',
-        wallpaperIndex: index
-      }
-    })
+  goBack() {
+    router.back()
   },
   toggleCollect(evt) {
     if (evt.stopPropagation) {
@@ -252,18 +175,38 @@ export default {
       .isCollected
     this.saveCollections()
   },
+  openModal(index) {
+    this.currentWallpaperIndex = index
+    this.showModal = true
+  },
+  closeModal() {
+    this.showModal = false
+  },
+  toggleModalCollect() {
+    const index = this.currentWallpaperIndex
+    this.wallpaperList[index].isCollected = !this.wallpaperList[index]
+      .isCollected
+    this.saveCollections()
+  },
   saveCollections() {
     // 获取当前页面收藏的壁纸
     const currentCollections = this.wallpaperList
       .filter(item => item.isCollected)
-      .map(item => ({ src: item.src, type: 'phone' }))
+      .map(item => ({
+        src: item.src,
+        type: this.isComputer ? 'computer' : 'phone'
+      }))
 
     // 获取当前页面所有壁纸的src
     const currentSrcs = this.wallpaperList.map(item => item.src)
 
+    const storageKey = this.isComputer
+      ? 'computer_collections'
+      : 'phone_collections'
+
     // 读取已有收藏，合并后保存
     storage.get({
-      key: 'phone_collections',
+      key: storageKey,
       success: data => {
         let existingCollections = []
         try {
@@ -280,31 +223,37 @@ export default {
         // 合并收藏
         const mergedCollections = [...otherCollections, ...currentCollections]
 
+        console.log(
+          'Saving collections to',
+          storageKey,
+          ':',
+          mergedCollections.length,
+          mergedCollections
+        )
         storage.set({
-          key: 'phone_collections',
-          value: JSON.stringify(mergedCollections)
+          key: storageKey,
+          value: JSON.stringify(mergedCollections),
+          success: () => {
+            console.log('Collections saved successfully to', storageKey)
+          },
+          fail: (data, code) => {
+            console.error(
+              'Failed to save collections to',
+              storageKey,
+              ':',
+              code,
+              data
+            )
+          }
         })
       },
       fail: () => {
         storage.set({
-          key: 'phone_collections',
+          key: storageKey,
           value: JSON.stringify(currentCollections)
         })
       }
     })
-  },
-  openModal(index) {
-    this.currentWallpaperIndex = index
-    this.showModal = true
-  },
-  closeModal() {
-    this.showModal = false
-  },
-  toggleModalCollect() {
-    const index = this.currentWallpaperIndex
-    this.wallpaperList[index].isCollected = !this.wallpaperList[index]
-      .isCollected
-    this.saveCollections()
   }
 }
 </script>
@@ -313,13 +262,6 @@ export default {
 .page {
   flex-direction: column;
   background-color: #ffffff;
-}
-
-.top-section {
-  flex-direction: column;
-  position: relative;
-  width: 100%;
-  height: 550px;
 }
 
 .top-bg {
@@ -331,74 +273,43 @@ export default {
   resize-mode: cover;
 }
 
-.content-wrapper {
-  flex-direction: column;
-  padding: 0 30px;
-  position: absolute;
-  top: 0;
-  left: 0;
+.navbar {
+  height: 100px;
   width: 100%;
-}
-
-.logo-row {
-  justify-content: flex-end;
-  margin-top: 110px;
-  margin-bottom: 20px;
-}
-
-.logo {
-  width: 350px;
-  height: 105px;
-  object-fit: contain;
-}
-
-.banner {
-  width: 100%;
-  height: 350px;
-  border-radius: 20px;
-  object-fit: cover;
-}
-
-.category-section {
   flex-direction: row;
-  justify-content: space-around;
-  padding: 20px 0px;
-  margin-top: 20px;
-}
-
-.category-item {
-  flex-direction: column;
   align-items: center;
-  margin: 0 -8px;
+  justify-content: space-between;
+  padding: 0 30px;
+  margin-top: 50px;
 }
 
-.category-img {
-  width: 240px;
-  height: 240px;
-  margin-bottom: 10px;
+.back-btn {
+  width: 80px;
+  height: 80px;
+  justify-content: center;
+  align-items: center;
 }
 
-.category-name {
-  font-size: 45px;
-  color: #333333;
-  font-weight: 900;
-  font-family: sans-serif-black;
-}
-
-.title-wrapper {
-  padding: 20px 30px;
-  margin-top: 10px;
-}
-
-.title-icon {
-  height: 40px;
+.back-icon {
+  width: 60px;
+  height: 60px;
   object-fit: contain;
+}
+
+.title {
+  font-size: 48px;
+  color: #000000;
+  font-weight: 900;
+}
+
+.placeholder {
+  width: 60px;
 }
 
 .wallpaper-list {
   padding: 0 20px;
   flex: 1;
-  height: 100%;
+  margin-top: 20px;
 }
 
 .wallpaper-item {
@@ -424,6 +335,23 @@ export default {
 .collect-icon {
   position: absolute;
   bottom: -30px;
+  right: 20px;
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+}
+
+.wallpaper-card-computer {
+  width: 100%;
+  height: 410px;
+  border-radius: 20px;
+  background-color: #f0f0f0;
+  position: relative;
+}
+
+.collect-icon-computer {
+  position: absolute;
+  bottom: 20px;
   right: 20px;
   width: 150px;
   height: 150px;

@@ -57,8 +57,9 @@
         "component": "index"
       },
       "pages/Webview": {
-        "component": "index"
-      }
+        "component": "index"      },
+      "pages/CategoryList": {
+        "component": "index"      }
     }
   },
   "display": {
@@ -83,6 +84,10 @@
       },
       "pages/Webview": {
         "titleBar": true,
+        "menu": false
+      },
+      "pages/CategoryList": {
+        "titleBar": false,
         "menu": false
       }
     }
