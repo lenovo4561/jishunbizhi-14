@@ -47,6 +47,8 @@
       >
         <div
           class="{{currentTab === 0 ? 'wallpaper-card' : 'wallpaper-card-computer'}}"
+          data-index="{{index}}"
+          onclick="handleCardClick"
         >
           <image class="wallpaper-image" src="{{item.src}}"></image>
           <image
@@ -58,16 +60,62 @@
         </div>
       </list-item>
     </list>
+
+    <!-- 模态框 -->
+    <div class="modal-mask" if="{{showModal}}">
+      <stack class="modal-stack">
+        <!-- 背景模糊 -->
+        <image
+          class="modal-bg-blur"
+          src="{{list[currentIndex] ? list[currentIndex].src : ''}}"
+        ></image>
+        <div class="modal-bg-overlay"></div>
+
+        <!-- 内容 -->
+        <div class="modal-content">
+          <!-- 关闭按钮 -->
+          <div class="close-btn-wrapper" onclick="closeModal">
+            <image class="close-btn" src="/widgets/assets/img/x.png"></image>
+          </div>
+
+          <!-- 大图 -->
+          <div class="{{currentTab === 1 ? 'modal-image-wrapper-computer' : 'modal-image-wrapper'}}">
+            <image
+              class="{{currentTab === 1 ? 'modal-main-image-computer' : 'modal-main-image'}}"
+              src="{{list[currentIndex] ? list[currentIndex].src : ''}}"
+            ></image>
+          </div>
+
+          <!-- 底部操作栏 -->
+          <div class="modal-footer">
+            <div class="download-btn" onclick="downloadImage">
+              <text class="download-text">下载图片</text>
+            </div>
+            <div class="modal-collect-btn" onclick="toggleModalCollect">
+              <image
+                class="modal-collect-icon"
+                src="/widgets/assets/img/shoucang-s.png"
+              ></image>
+            </div>
+          </div>
+        </div>
+      </stack>
+    </div>
   </div>
 </template>
 
 <script>
 import storage from '@system.storage'
+import prompt from '@system.prompt'
+import request from '@system.request'
+import media from '@system.media'
 
 export default {
   data: {
     currentTab: 0, // 0: 手机壁纸, 1: 电脑壁纸
-    list: []
+    list: [],
+    showModal: false,
+    currentIndex: 0
   },
   onInit() {
     this.loadCollections()
@@ -126,11 +174,82 @@ export default {
       }
     })
   },
-  removeCollect(evt) {
-    if (evt.stopPropagation) {
-      evt.stopPropagation()
+  handleCardClick(evt) {
+    // 使用 currentTarget 而不是 target，确保获取的是 div 的 data-index
+    const target = evt.currentTarget || evt.target
+    const index = target.dataset.index
+    console.log('handleCardClick called, target:', evt.target, 'currentTarget:', evt.currentTarget)
+    console.log('handleCardClick index:', index, 'list length:', this.list.length)
+    if (index !== undefined && index !== null) {
+      this.openModal(parseInt(index))
+    } else {
+      console.error('handleCardClick: index is undefined!')
     }
+  },
+  openModal(index) {
+    console.log('openModal called, index:', index, 'list length:', this.list.length)
+    this.currentIndex = index
+    this.showModal = true
+    console.log('showModal set to:', this.showModal, 'currentIndex:', this.currentIndex)
+  },
+  closeModal() {
+    this.showModal = false
+  },
+  switchWallpaper(index) {
+    this.currentIndex = index
+  },
+  downloadImage() {
+    const imageUrl = this.list[this.currentIndex].src
+    if (!imageUrl) return
+
+    prompt.showToast({ message: '开始下载...' })
+
+    const encodedUrl = imageUrl.replace(/\s/g, '%20')
+
+    request.download({
+      url: encodedUrl,
+      success: data => {
+        console.info('Download success:', data.token)
+        request.onDownloadComplete({
+          token: data.token,
+          success: ret => {
+            console.info('Download complete, path:', ret.uri)
+
+            media.saveToPhotosAlbum({
+              uri: ret.uri,
+              success: () => {
+                prompt.showToast({ message: '保存成功' })
+              },
+              fail: (data, code) => {
+                console.error('Save to album failed:', data, code)
+                prompt.showToast({ message: '保存失败，请检查权限' })
+              }
+            })
+          },
+          fail: (data, code) => {
+            console.error('Download complete check failed:', data, code)
+            prompt.showToast({ message: '下载失败' })
+          }
+        })
+      },
+      fail: (data, code) => {
+        console.error('Download request failed:', data, code)
+        prompt.showToast({ message: '下载请求失败' })
+      }
+    })
+  },
+  toggleModalCollect() {
+    const index = this.currentIndex
+    this.removeCollectByIndex(index)
+  },
+  removeCollect(evt) {
+    console.log('removeCollect called')
+    // 不需要 stopPropagation，让收藏按钮独立处理点击
     const index = evt.target.dataset.index
+    console.log('removeCollect index:', index)
+    this.removeCollectByIndex(index)
+  },
+  removeCollectByIndex(index) {
     this.list.splice(index, 1)
 
     const storageKey =
@@ -139,6 +258,14 @@ export default {
       key: storageKey,
       value: JSON.stringify(this.list)
     })
+    
+    // 如果删除后列表为空或当前索引越界，关闭模态框
+    if (this.list.length === 0 || this.currentIndex >= this.list.length) {
+      this.showModal = false
+      this.currentIndex = 0
+    } else if (this.currentIndex > 0 && this.currentIndex >= this.list.length) {
+      this.currentIndex = this.list.length - 1
+    }
   }
 }
 </script>
@@ -270,6 +397,7 @@ export default {
   width: 35px;
   height: 35px;
   object-fit: contain;
+  z-index: 10;
 }
 
 .wallpaper-card-computer {
@@ -287,5 +415,173 @@ export default {
   width: 35px;
   height: 35px;
   object-fit: contain;
+  z-index: 10;
+}
+
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.modal-stack {
+  width: 100%;
+  height: 463px;
+}
+
+.modal-bg-blur {
+  width: 100%;
+  height: 100%;
+  resize-mode: cover;
+  filter: blur(12px);
+  transform: scale(1.1);
+}
+
+.modal-bg-overlay {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  padding: 14px 0;
+}
+
+.close-btn-wrapper {
+  position: absolute;
+  top: 3px;
+  right: 2px;
+  width: 19px;
+  height: 19px;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.close-btn {
+  width: 14px;
+  height: 14px;
+}
+
+.thumbnail-wrapper {
+  width: 100%;
+  height: 56px;
+  padding: 0 9px;
+}
+
+.thumbnail-list {
+  width: 100%;
+  height: 100%;
+  flex-direction: row;
+}
+
+.thumbnail-item {
+  margin-right: 5px;
+}
+
+.thumbnail-box {
+  width: 84px;
+  height: 56px;
+  border-radius: 3px;
+  background-color: rgba(255, 255, 255, 0.2);
+  justify-content: center;
+  align-items: center;
+  padding: 2px;
+}
+
+.thumbnail-box-active {
+  width: 84px;
+  height: 56px;
+  border-radius: 3px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border: 1.5px solid #ffffff;
+  justify-content: center;
+  align-items: center;
+  padding: 2px;
+}
+
+.thumbnail-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 3px;
+  resize-mode: cover;
+}
+
+.modal-image-wrapper {
+  width: 100%;
+  padding: 9px 19px;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-image-wrapper-computer {
+  width: 100%;
+  padding: 9px 0;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-main-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 7px;
+  resize-mode: cover;
+}
+
+.modal-main-image-computer {
+  width: 100%;
+  height: 100%;
+  border-radius: 7px;
+  resize-mode: contain;
+}
+
+.modal-footer {
+  width: 100%;
+  padding: 0px 14px 19px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.download-btn {
+  flex: 1;
+  height: 28px;
+  background-color: #000000;
+  border-radius: 14px;
+  justify-content: center;
+  align-items: center;
+  margin-right: 9px;
+}
+
+.download-text {
+  color: #ffffff;
+  font-size: 8px;
+  font-weight: bold;
+}
+
+.modal-collect-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 14px;
+  background-color: rgba(255, 255, 255, 0.3);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-collect-icon {
+  width: 14px;
+  height: 14px;
 }
 </style>

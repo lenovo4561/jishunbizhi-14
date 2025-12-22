@@ -52,9 +52,9 @@
           </div>
 
           <!-- 大图 -->
-          <div class="modal-image-wrapper">
+          <div class="{{isComputer ? 'modal-image-wrapper-computer' : 'modal-image-wrapper'}}">
             <image
-              class="modal-main-image"
+              class="{{isComputer ? 'modal-main-image-computer' : 'modal-main-image'}}"
               src="{{wallpaperList[currentWallpaperIndex].src}}"
             ></image>
           </div>
@@ -184,6 +184,9 @@ export default {
   },
   closeModal() {
     this.showModal = false
+  },
+  switchWallpaper(index) {
+    this.currentWallpaperIndex = index
   },
   downloadImage() {
     const imageUrl = this.wallpaperList[this.currentWallpaperIndex].src
@@ -450,6 +453,50 @@ export default {
   padding: 14px 0;
 }
 
+.thumbnail-wrapper {
+  width: 100%;
+  height: 56px;
+  padding: 0 9px;
+}
+
+.thumbnail-list {
+  width: 100%;
+  height: 100%;
+  flex-direction: row;
+}
+
+.thumbnail-item {
+  margin-right: 5px;
+}
+
+.thumbnail-box {
+  width: 84px;
+  height: 56px;
+  border-radius: 3px;
+  background-color: rgba(255, 255, 255, 0.2);
+  justify-content: center;
+  align-items: center;
+  padding: 2px;
+}
+
+.thumbnail-box-active {
+  width: 84px;
+  height: 56px;
+  border-radius: 3px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border: 1.5px solid #ffffff;
+  justify-content: center;
+  align-items: center;
+  padding: 2px;
+}
+
+.thumbnail-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 3px;
+  resize-mode: cover;
+}
+
 .close-btn-wrapper {
   position: absolute;
   top: 3px;
@@ -474,11 +521,26 @@ export default {
   align-items: center;
 }
 
+.modal-image-wrapper-computer {
+  width: 100%;
+  padding: 9px 0;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+}
+
 .modal-main-image {
   width: 100%;
   height: 100%;
   border-radius: 7px;
   resize-mode: cover;
+}
+
+.modal-main-image-computer {
+  width: 100%;
+  height: 100%;
+  border-radius: 7px;
+  resize-mode: contain;
 }
 
 .modal-footer {

@@ -1,5 +1,5 @@
 <template>
-  <stack class="page">
+  <div class="page">
     <!-- 顶部背景 -->
     <image class="top-bg" src="/widgets/assets/img/wodebg.png"></image>
 
@@ -42,7 +42,7 @@
         </div>
       </div>
     </div>
-  </stack>
+  </div>
 </template>
 
 <script>
@@ -77,9 +77,14 @@ export default {
   width: 100%;
   height: 100%;
   background-color: #f8f8f8;
+  flex-direction: column;
+  position: relative;
 }
 
 .top-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 139px;
   resize-mode: cover;
@@ -89,6 +94,7 @@ export default {
   flex-direction: column;
   width: 100%;
   height: 100%;
+  position: relative;
 }
 
 .user-section {
