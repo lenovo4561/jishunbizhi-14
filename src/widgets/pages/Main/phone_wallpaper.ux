@@ -40,12 +40,6 @@
       >
         <div class="wallpaper-card" onclick="openModal(index)">
           <image class="wallpaper-image" src="{{item.src}}"></image>
-          <image
-            class="collect-icon"
-            src="{{item.isCollected ? '/widgets/assets/img/yishoucang.png' : '/widgets/assets/img/shoucang.png'}}"
-            data-index="{{index}}"
-            onclick="toggleCollect"
-          ></image>
         </div>
       </list-item>
     </list>
@@ -83,7 +77,7 @@
             <div class="modal-collect-btn" onclick="toggleModalCollect">
               <image
                 class="modal-collect-icon"
-                src="{{wallpaperList[currentWallpaperIndex].isCollected ? '/widgets/assets/img/shoucang-s.png' : '/widgets/assets/img/shoucang-u.png'}}"
+                src="{{currentWallpaperCollected ? '/widgets/assets/img/shoucang-s.png' : '/widgets/assets/img/shoucang-u.png'}}"
               ></image>
             </div>
           </div>
@@ -107,6 +101,7 @@ export default {
     bannerImage: '/widgets/assets/img/banner-1.png',
     showModal: false,
     currentWallpaperIndex: 0,
+    currentWallpaperCollected: false,
     categoryList: [
       { name: '动漫', image: '/widgets/assets/img/DONGMAN.png' },
       { name: '人物', image: '/widgets/assets/img/RENWU.png' },
@@ -200,9 +195,11 @@ export default {
     this.loadCollectionStatus()
   },
   onShow() {
+    console.log('Phone wallpaper page onShow')
     this.loadCollectionStatus()
   },
   loadCollectionStatus() {
+    console.log('Phone wallpaper loadCollectionStatus called')
     storage.get({
       key: 'phone_collections',
       success: data => {
@@ -218,18 +215,39 @@ export default {
           } else {
             collections = data
           }
+          
+          console.log('Phone collections loaded:', collections ? collections.length : 0)
+          
           if (collections && Array.isArray(collections)) {
             const collectedSrcs = collections.map(c => c.src)
-            this.wallpaperList.forEach(item => {
-              item.isCollected = collectedSrcs.includes(item.src)
+            // 更新每个壁纸的收藏状态
+            this.wallpaperList.forEach((item, index) => {
+              const isCollected = collectedSrcs.includes(item.src)
+              // 使用 $set 确保响应式更新
+              if (item.isCollected !== isCollected) {
+                this.$set(this.wallpaperList[index], 'isCollected', isCollected)
+              }
             })
-            this.$forceUpdate()
+          } else {
+            // 如果没有收藏数据，清空所有收藏状态
+            this.wallpaperList.forEach((item, index) => {
+              if (item.isCollected) {
+                this.$set(this.wallpaperList[index], 'isCollected', false)
+              }
+            })
           }
+          
+          console.log('Phone wallpaper list updated, forcing update')
+          this.$forceUpdate()
         } catch (e) {
           console.error('Load collection status error:', e)
+          // 出错时也要更新视图
+          this.$forceUpdate()
         }
       },
-      fail: () => {}
+      fail: (error, code) => {
+        console.log('Failed to load phone collections', error, code)
+      }
     })
   },
   goCategoryList(item) {
@@ -254,63 +272,149 @@ export default {
       evt.stopPropagation()
     }
     const index = evt.target.dataset.index
-    this.wallpaperList[index].isCollected = !this.wallpaperList[index]
-      .isCollected
-    this.saveCollections()
+    const item = this.wallpaperList[index]
+    const wasCollected = item.isCollected
+    
+    // 立即更新UI状态
+    item.isCollected = !wasCollected
+    this.$forceUpdate()
+    
+    // 立即更新 localStorage
+    this.updateCollectionInStorage(item.src, !wasCollected)
+    
+    // 显示操作提示
+    prompt.showToast({ 
+      message: wasCollected ? '已取消收藏' : '已收藏' 
+    })
   },
-  saveCollections() {
-    // 获取当前页面收藏的壁纸
-    const currentCollections = this.wallpaperList
-      .filter(item => item.isCollected)
-      .map(item => ({ src: item.src, type: 'phone' }))
-
-    // 获取当前页面所有壁纸的src
-    const currentSrcs = this.wallpaperList.map(item => item.src)
-
-    // 读取已有收藏，合并后保存
+  // 实时更新单个壁纸的收藏状态到localStorage
+  updateCollectionInStorage(src, isCollected) {
     storage.get({
       key: 'phone_collections',
       success: data => {
-        let existingCollections = []
+        let collections = []
         try {
           if (data && typeof data === 'string' && data.trim()) {
-            existingCollections = JSON.parse(data) || []
-          } else if (
-            data &&
-            data.value &&
-            typeof data.value === 'string' &&
-            data.value.trim()
-          ) {
-            existingCollections = JSON.parse(data.value) || []
+            collections = JSON.parse(data) || []
+          } else if (data && data.value && typeof data.value === 'string' && data.value.trim()) {
+            collections = JSON.parse(data.value) || []
+          } else if (data && data.value) {
+            collections = data.value || []
           }
         } catch (e) {
-          existingCollections = []
+          collections = []
         }
 
-        // 过滤掉当前页面的壁纸（避免重复），保留其他来源的收藏
-        const otherCollections = existingCollections.filter(
-          item => !currentSrcs.includes(item.src)
-        )
+        // 查找是否已存在
+        const existingIndex = collections.findIndex(c => c.src === src)
+        
+        if (isCollected) {
+          // 添加收藏
+          if (existingIndex === -1) {
+            collections.push({ src: src, type: 'phone' })
+          }
+        } else {
+          // 取消收藏
+          if (existingIndex !== -1) {
+            collections.splice(existingIndex, 1)
+          }
+        }
 
-        // 合并收藏
-        const mergedCollections = [...otherCollections, ...currentCollections]
-
+        // 立即保存到localStorage
         storage.set({
           key: 'phone_collections',
-          value: JSON.stringify(mergedCollections)
+          value: JSON.stringify(collections),
+          success: () => {
+            console.log('Phone collection updated instantly, total:', collections.length)
+            // 立即通知所有页面刷新
+            if (this.$parent() && this.$parent().refreshAllCollectionStatus) {
+              this.$parent().refreshAllCollectionStatus()
+            }
+          },
+          fail: (data, code) => {
+            console.error('Failed to update phone collection:', data, code)
+            // 失败时恢复UI状态
+            this.loadCollectionStatus()
+          }
         })
       },
       fail: () => {
-        storage.set({
-          key: 'phone_collections',
-          value: JSON.stringify(currentCollections)
-        })
+        // 如果读取失败，直接创建新的收藏列表
+        if (isCollected) {
+          storage.set({
+            key: 'phone_collections',
+            value: JSON.stringify([{ src: src, type: 'phone' }]),
+            success: () => {
+              if (this.$parent() && this.$parent().refreshAllCollectionStatus) {
+                this.$parent().refreshAllCollectionStatus()
+              }
+            }
+          })
+        }
       }
     })
   },
   openModal(index) {
+    console.log('openModal called with index:', index, 'wallpaperList length:', this.wallpaperList.length)
+    
+    if (!this.wallpaperList || index >= this.wallpaperList.length) {
+      console.error('Invalid wallpaperList or index')
+      return
+    }
+    
+    // 先设置索引并显示模态框，让用户有即时反馈
     this.currentWallpaperIndex = index
+    this.currentWallpaperCollected = this.wallpaperList[index].isCollected || false
     this.showModal = true
+    
+    console.log('Modal shown, now loading collection status')
+    
+    // 然后异步加载最新的收藏状态
+    const storageKey = 'phone_collections'
+    storage.get({
+      key: storageKey,
+      success: data => {
+        try {
+          let collections
+          if (typeof data === 'string' && data) {
+            collections = JSON.parse(data)
+          } else if (data && data.value) {
+            collections =
+              typeof data.value === 'string' && data.value
+                ? JSON.parse(data.value)
+                : data.value
+          } else {
+            collections = data
+          }
+          if (collections && Array.isArray(collections)) {
+            const collectedSrcs = collections.map(c => c.src)
+            this.wallpaperList.forEach((item, idx) => {
+              const isCollected = collectedSrcs.includes(item.src)
+              if (item.isCollected !== isCollected) {
+                this.$set(this.wallpaperList[idx], 'isCollected', isCollected)
+              }
+            })
+            // 同步更新当前壁纸的收藏状态
+            this.currentWallpaperCollected = this.wallpaperList[this.currentWallpaperIndex].isCollected || false
+          } else {
+            this.wallpaperList.forEach((item, idx) => {
+              if (item.isCollected) {
+                this.$set(this.wallpaperList[idx], 'isCollected', false)
+              }
+            })
+            // 同步更新当前壁纸的收藏状态
+            this.currentWallpaperCollected = false
+          }
+          console.log('Collection status updated in modal')
+          this.$forceUpdate()
+        } catch (e) {
+          console.error('Load collection status error in openModal:', e)
+        }
+      },
+      fail: () => {
+        console.log('Failed to load collections in openModal')
+      }
+    })
   },
   closeModal() {
     this.showModal = false
@@ -358,9 +462,21 @@ export default {
   },
   toggleModalCollect() {
     const index = this.currentWallpaperIndex
-    this.wallpaperList[index].isCollected = !this.wallpaperList[index]
-      .isCollected
-    this.saveCollections()
+    const item = this.wallpaperList[index]
+    const wasCollected = item.isCollected
+    
+    // 立即更新UI状态
+    this.$set(this.wallpaperList[index], 'isCollected', !wasCollected)
+    this.currentWallpaperCollected = !wasCollected
+    this.$forceUpdate()
+    
+    // 立即更新 localStorage
+    this.updateCollectionInStorage(item.src, !wasCollected)
+    
+    // 显示提示
+    prompt.showToast({ 
+      message: wasCollected ? '已取消收藏' : '已收藏' 
+    })
   }
 }
 </script>

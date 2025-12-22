@@ -7,10 +7,10 @@
   <div class="main-page">
     <tabs class="tabs" onchange="changeTab" index="{{currentIndex}}">
       <tab-content class="tab-content">
-        <phone-page></phone-page>
-        <computer-page></computer-page>
+        <phone-page id="phone-page"></phone-page>
+        <computer-page id="computer-page"></computer-page>
         <collection-page id="collection-page"></collection-page>
-        <mine-page></mine-page>
+        <mine-page id="mine-page"></mine-page>
       </tab-content>
     </tabs>
 
@@ -72,29 +72,160 @@ const $apis = require('./helper/apis').default
 
 export default {
   private: {
-    currentIndex: 0
+    currentIndex: 0,
+    storageCheckTimer: null,
+    lastPhoneCollections: '',
+    lastComputerCollections: ''
   },
   onInit() {
     this.initUser()
+    this.startStorageCheck()
   },
-  changeTab(e) {
-    this.currentIndex = e.index
-    // 当切换到收藏页面时，刷新收藏数据
-    if (e.index === 2) {
-      this.$child('collection-page').refresh()
-    }
-  },
-  clickTab(index) {
-    this.currentIndex = index
-    // 当切换到收藏页面时，刷新收藏数据
-    if (index === 2) {
-      this.$nextTick(() => {
+  onShow() {
+    // 每次页面显示时刷新当前页面的收藏状态
+    this.startStorageCheck()
+    this.$nextTick(() => {
+      if (this.currentIndex === 0) {
+        const phonePage = this.$child('phone-page')
+        if (phonePage && phonePage.loadCollectionStatus) {
+          phonePage.loadCollectionStatus()
+        }
+      } else if (this.currentIndex === 1) {
+        const computerPage = this.$child('computer-page')
+        if (computerPage && computerPage.loadCollectionStatus) {
+          computerPage.loadCollectionStatus()
+        }
+      } else if (this.currentIndex === 2) {
         const collectionPage = this.$child('collection-page')
         if (collectionPage && collectionPage.refresh) {
           collectionPage.refresh()
         }
-      })
+      }
+    })
+  },
+  onHide() {
+    this.stopStorageCheck()
+  },
+  onDestroy() {
+    this.stopStorageCheck()
+  },
+  changeTab(e) {
+    this.currentIndex = e.index
+    // 当切换页面时，刷新对应页面的收藏状态
+    this.$nextTick(() => {
+      if (e.index === 0) {
+        // 手机壁纸页面
+        const phonePage = this.$child('phone-page')
+        if (phonePage && phonePage.loadCollectionStatus) {
+          phonePage.loadCollectionStatus()
+        }
+      } else if (e.index === 1) {
+        // 电脑壁纸页面
+        const computerPage = this.$child('computer-page')
+        if (computerPage && computerPage.loadCollectionStatus) {
+          computerPage.loadCollectionStatus()
+        }
+      } else if (e.index === 2) {
+        // 收藏页面
+        const collectionPage = this.$child('collection-page')
+        if (collectionPage && collectionPage.refresh) {
+          collectionPage.refresh()
+        }
+      }
+    })
+  },
+  clickTab(index) {
+    this.currentIndex = index
+    // 当切换页面时，刷新对应页面的收藏状态
+    this.$nextTick(() => {
+      if (index === 0) {
+        // 手机壁纸页面
+        const phonePage = this.$child('phone-page')
+        if (phonePage && phonePage.loadCollectionStatus) {
+          phonePage.loadCollectionStatus()
+        }
+      } else if (index === 1) {
+        // 电脑壁纸页面
+        const computerPage = this.$child('computer-page')
+        if (computerPage && computerPage.loadCollectionStatus) {
+          computerPage.loadCollectionStatus()
+        }
+      } else if (index === 2) {
+        // 收藏页面
+        const collectionPage = this.$child('collection-page')
+        if (collectionPage && collectionPage.refresh) {
+          collectionPage.refresh()
+        }
+      }
+    })
+  },
+  // 开始检查 storage 变化
+  startStorageCheck() {
+    this.stopStorageCheck()
+    this.checkStorageChanges()
+    this.storageCheckTimer = setInterval(() => {
+      this.checkStorageChanges()
+    }, 500)
+  },
+  // 停止检查
+  stopStorageCheck() {
+    if (this.storageCheckTimer) {
+      clearInterval(this.storageCheckTimer)
+      this.storageCheckTimer = null
     }
+  },
+  // 检查 storage 是否有变化
+  checkStorageChanges() {
+    storage.get({
+      key: 'phone_collections',
+      success: (data) => {
+        const currentData = typeof data === 'string' ? data : (data && data.value ? JSON.stringify(data.value) : '')
+        if (currentData !== this.lastPhoneCollections) {
+          this.lastPhoneCollections = currentData
+          this.refreshCollectionPage()
+        }
+      }
+    })
+    storage.get({
+      key: 'computer_collections',
+      success: (data) => {
+        const currentData = typeof data === 'string' ? data : (data && data.value ? JSON.stringify(data.value) : '')
+        if (currentData !== this.lastComputerCollections) {
+          this.lastComputerCollections = currentData
+          this.refreshCollectionPage()
+        }
+      }
+    })
+  },
+  // 刷新收藏页面
+  refreshCollectionPage() {
+    if (this.currentIndex === 2) {
+      const collectionPage = this.$child('collection-page')
+      if (collectionPage && collectionPage.loadCollections) {
+        collectionPage.loadCollections()
+      }
+    }
+  },
+  // 刷新所有页面的收藏状态（供子组件调用）
+  refreshAllCollectionStatus() {
+    // 立即刷新所有页面
+    this.$nextTick(() => {
+      // 刷新手机壁纸页面
+      const phonePage = this.$child('phone-page')
+      if (phonePage && phonePage.loadCollectionStatus) {
+        phonePage.loadCollectionStatus()
+      }
+      // 刷新电脑壁纸页面
+      const computerPage = this.$child('computer-page')
+      if (computerPage && computerPage.loadCollectionStatus) {
+        computerPage.loadCollectionStatus()
+      }
+      // 刷新收藏页面
+      const collectionPage = this.$child('collection-page')
+      if (collectionPage && collectionPage.loadCollections) {
+        collectionPage.loadCollections()
+      }
+    })
   },
   initUser() {
     Promise.all([

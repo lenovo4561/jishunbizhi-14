@@ -51,12 +51,6 @@
           onclick="handleCardClick"
         >
           <image class="wallpaper-image" src="{{item.src}}"></image>
-          <image
-            class="{{currentTab === 0 ? 'collect-icon' : 'collect-icon-computer'}}"
-            src="/widgets/assets/img/yishoucang.png"
-            data-index="{{index}}"
-            onclick="removeCollect"
-          ></image>
         </div>
       </list-item>
     </list>
@@ -118,25 +112,40 @@ export default {
     currentIndex: 0
   },
   onInit() {
+    console.log('Collection page onInit')
     this.loadCollections()
   },
   onShow() {
+    console.log('Collection page onShow')
+    // 直接加载，不需要延迟
     this.loadCollections()
   },
   onReady() {
+    console.log('Collection page onReady')
     this.loadCollections()
   },
   // 供父组件调用的刷新方法
   refresh() {
+    console.log('Collection page refresh called')
     this.loadCollections()
   },
   switchTab(index) {
+    console.log('Switch tab to:', index)
     this.currentTab = index
     this.loadCollections()
+    // 切换标签时同步刷新其他页面的收藏状态
+    setTimeout(() => {
+      if (this.$parent() && this.$parent().refreshAllCollectionStatus) {
+        this.$parent().refreshAllCollectionStatus()
+      }
+    }, 50)
   },
   loadCollections() {
     const storageKey =
       this.currentTab === 0 ? 'phone_collections' : 'computer_collections'
+    
+    console.log('Loading collections, tab:', this.currentTab, 'key:', storageKey)
+    
     storage.get({
       key: storageKey,
       success: data => {
@@ -157,10 +166,14 @@ export default {
             collections = []
           }
           // 过滤掉本地图片地址，只保留线上地址
-          this.list = (collections || []).filter(
+          const newList = (collections || []).filter(
             item => item.src && !item.src.startsWith('/assets/')
           )
-          // 强制更新视图
+          
+          console.log('Loaded collections count:', newList.length)
+          
+          // 直接赋值并强制更新
+          this.list = newList
           this.$forceUpdate()
         } catch (e) {
           console.error('Load collections error:', e)
@@ -168,7 +181,8 @@ export default {
           this.$forceUpdate()
         }
       },
-      fail: () => {
+      fail: (error, code) => {
+        console.log('Failed to load collections, error:', error, 'code:', code)
         this.list = []
         this.$forceUpdate()
       }
@@ -250,22 +264,52 @@ export default {
     this.removeCollectByIndex(index)
   },
   removeCollectByIndex(index) {
+    console.log('Removing collect at index:', index)
+    
+    if (index < 0 || index >= this.list.length) {
+      console.error('Invalid index:', index)
+      return
+    }
+    
+    const removedItem = this.list[index]
+    
+    // 删除指定索引的项目
     this.list.splice(index, 1)
 
     const storageKey =
       this.currentTab === 0 ? 'phone_collections' : 'computer_collections'
+    
+    console.log('Saving to storage, remaining count:', this.list.length)
+    
+    // 立即更新 localStorage
     storage.set({
       key: storageKey,
-      value: JSON.stringify(this.list)
+      value: JSON.stringify(this.list),
+      success: () => {
+        console.log('Collection removed successfully, count:', this.list.length)
+        
+        // 立即刷新视图
+        this.$forceUpdate()
+        
+        // 显示提示
+        prompt.showToast({ message: '已取消收藏' })
+        
+        // 取消收藏后关闭模态框
+        this.showModal = false
+        this.currentIndex = 0
+        
+        // 立即通知父组件刷新所有页面的收藏状态
+        if (this.$parent() && this.$parent().refreshAllCollectionStatus) {
+          this.$parent().refreshAllCollectionStatus()
+        }
+      },
+      fail: (data, code) => {
+        console.error('Failed to remove collection:', data, code)
+        // 保存失败时恢复数据
+        this.loadCollections()
+        prompt.showToast({ message: '操作失败，请重试' })
+      }
     })
-    
-    // 如果删除后列表为空或当前索引越界，关闭模态框
-    if (this.list.length === 0 || this.currentIndex >= this.list.length) {
-      this.showModal = false
-      this.currentIndex = 0
-    } else if (this.currentIndex > 0 && this.currentIndex >= this.list.length) {
-      this.currentIndex = this.list.length - 1
-    }
   }
 }
 </script>
