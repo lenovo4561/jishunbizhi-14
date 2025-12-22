@@ -86,7 +86,7 @@ export default {
   top: 0;
   left: 0;
   width: 100%;
-  height: 139px;
+  height: 239px;
   resize-mode: cover;
 }
 
@@ -127,6 +127,7 @@ export default {
   border-top-right-radius: 7px;
   padding: 9px;
   flex: 1;
+  margin-top:20px
 }
 
 .card-title {
@@ -156,15 +157,15 @@ export default {
 }
 
 .arrow-icon {
-  width: 12px;
-  height: 12px;
+  width: 25px;
+  height: 25px;
   object-fit: contain;
   opacity: 0.5;
 }
 
 .divider {
-  height: 0px;
-  background-color: #eeeeee;
+  height: 1px;
+  background-color: #f5f5f5;
   width: 100%;
 }
 </style>
