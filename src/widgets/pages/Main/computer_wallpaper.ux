@@ -25,10 +25,8 @@
 
     <!-- 列表标题 -->
     <div class="title-wrapper">
-      <image
-        class="title-icon"
-        src="/widgets/assets/img/zuixinbizhi.png"
-      ></image>
+      <text class="title-text">最新壁纸</text>
+      <image class="title-icon" src="/widgets/assets/img/yanjing.png"></image>
     </div>
 
     <!-- 壁纸列表 -->
@@ -376,8 +374,12 @@ export default {
 }
 
 .category-name {
-  font-size: 10px;
+  font-size: 14px;
   color: #333333;
+  lines: 1;
+  text-align: center;
+  width: 28px;
+  height: 14px;
   font-weight: 900;
   font-family: sans-serif-black;
 }
@@ -387,9 +389,20 @@ export default {
   margin-top: 2px;
 }
 
+.title-text {
+  width: 64px;
+  height: 16px;
+  font-size: 16px;
+  line-height: 16px;
+  letter-spacing: 0px;
+  color: #000000;
+  font-weight: 400;
+}
+
 .title-icon {
-  height: 9px;
+  height: 16px;
   object-fit: contain;
+  margin-left: 4px;
 }
 
 .wallpaper-list {
