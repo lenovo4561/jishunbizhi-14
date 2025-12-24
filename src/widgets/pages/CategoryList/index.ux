@@ -8,7 +8,7 @@
       <div class="back-btn" onclick="goBack">
         <image class="back-icon" src="/widgets/assets/img/back.png"></image>
       </div>
-      <text class="title">{{ categoryName }}</text>
+      <image class="title-img" src="{{ categoryImage }}"></image>
       <div class="placeholder"></div>
     </div>
 
@@ -56,7 +56,7 @@
           <!-- 底部操作栏 -->
           <div class="modal-footer">
             <div class="download-btn" onclick="downloadImage">
-              <text class="download-text">下载图片</text>
+              <image class="download-text" src="/widgets/assets/img/xiazaitupian_1.png"></image>
             </div>
             <div class="modal-collect-btn" onclick="toggleModalCollect">
               <image
@@ -81,6 +81,7 @@ import media from '@system.media'
 export default {
   data: {
     categoryName: '分类',
+    categoryImage: '',
     isComputer: false,
     showModal: false,
     currentWallpaperIndex: 0,
@@ -88,6 +89,7 @@ export default {
   },
   onInit() {
     console.info('CategoryList page init with name:', this.categoryName)
+    this.setCategoryImage()
     this.initWallpaperList()
     this.loadCollectionStatus()
     if (this.wallpaperIndex !== undefined && this.wallpaperIndex !== null) {
@@ -95,6 +97,16 @@ export default {
         this.openModal(this.wallpaperIndex)
       }, 100)
     }
+  },
+  setCategoryImage() {
+    const categoryImageMap = {
+      动漫: '/widgets/assets/img/dm-1.png',
+      人物: '/widgets/assets/img/rw-1.png',
+      萌宠: '/widgets/assets/img/mc-1.png',
+      自然: '/widgets/assets/img/zr-1.png',
+      最新壁纸: '/widgets/assets/img/zuixinbizhi.png'
+    }
+    this.categoryImage = categoryImageMap[this.categoryName] || ''
   },
   initWallpaperList() {
     const categoryMap = {
@@ -370,22 +382,21 @@ export default {
 }
 
 .back-btn {
-  width: 19px;
-  height: 19px;
+  width: 23px;
+  height: 23px;
   justify-content: center;
   align-items: center;
 }
 
 .back-icon {
-  width: 9px;
-  height: 9px;
+  width: 14px;
+  height: 14px;
   object-fit: contain;
 }
 
-.title {
-  font-size: 11px;
-  color: #000000;
-  font-weight: 900;
+.title-img {
+  height: 14px;
+  object-fit: contain;
 }
 
 .placeholder {
@@ -592,9 +603,8 @@ export default {
 }
 
 .download-text {
-  color: #ffffff;
-  font-size: 8px;
-  font-weight: bold;
+  height: 12px;
+  object-fit: contain;
 }
 
 .modal-collect-btn {

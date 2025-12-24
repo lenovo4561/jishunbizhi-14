@@ -16,16 +16,14 @@
 
     <div class="tabs-section">
       <div class="tabs-box">
-        <image
-          class="tab-img"
-          src="{{currentTab === 0 ? '/widgets/assets/img/sjbz-s.png' : '/widgets/assets/img/sjbz-u.png'}}"
-          onclick="switchTab(0)"
-        ></image>
-        <image
-          class="tab-img"
-          src="{{currentTab === 1 ? '/widgets/assets/img/dnbz-s.png' : '/widgets/assets/img/dnbz-u.png'}}"
-          onclick="switchTab(1)"
-        ></image>
+        <div class="{{currentTab === 0 ? 'tab-item tab-item-active' : 'tab-item'}}" onclick="switchTab(0)">
+          <image class="tab-text-img" src="{{currentTab === 0 ? '/widgets/assets/img/sj-u.png' : '/widgets/assets/img/sj-s.png'}}"></image>
+          <image class="tab-icon" src="/widgets/assets/img/yanjing.png" if="{{currentTab === 0}}"></image>
+        </div>
+        <div class="{{currentTab === 1 ? 'tab-item tab-item-active' : 'tab-item'}}" onclick="switchTab(1)">
+          <image class="tab-text-img" src="{{currentTab === 1 ? '/widgets/assets/img/dn-u.png' : '/widgets/assets/img/dn-s.png'}}"></image>
+          <image class="tab-icon" src="/widgets/assets/img/yanjing.png" if="{{currentTab === 1}}"></image>
+        </div>
       </div>
     </div>
 
@@ -83,7 +81,7 @@
           <!-- 底部操作栏 -->
           <div class="modal-footer">
             <div class="download-btn" onclick="downloadImage">
-              <text class="download-text">下载图片</text>
+              <image class="download-text" src="/widgets/assets/img/xiazaitupian_1.png"></image>
             </div>
             <div class="modal-collect-btn" onclick="toggleModalCollect">
               <image
@@ -370,7 +368,7 @@ export default {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  margin-top: -42px;
+  margin-top: -20px;
 }
 
 .tabs-box {
@@ -380,11 +378,30 @@ export default {
   padding: 0 7px;
 }
 
-.tab-img {
+.tab-item {
   width: 48%;
-  height: 46px;
+  height: 36px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+  border-radius: 18px;
+  padding: 0 10px;
+}
+
+.tab-item-active {
+  background-color: #000000;
+}
+
+.tab-text-img {
+  height: 16px;
   object-fit: contain;
-  margin: 0;
+  margin-right: 4px;
+}
+
+.tab-icon {
+  height: 16px;
+  object-fit: contain;
 }
 
 .empty-box {
@@ -610,9 +627,8 @@ export default {
 }
 
 .download-text {
-  color: #ffffff;
-  font-size: 8px;
-  font-weight: bold;
+  height: 12px;
+  object-fit: contain;
 }
 
 .modal-collect-btn {

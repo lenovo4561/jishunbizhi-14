@@ -19,13 +19,13 @@
         onclick="goCategoryList($item)"
       >
         <image class="category-img" src="{{$item.image}}"></image>
-        <text class="category-name">{{ $item.name }}</text>
+        <image class="category-name" src="{{$item.nameImage}}"></image>
       </div>
     </div>
 
     <!-- 列表标题 -->
     <div class="title-wrapper">
-      <text class="title-text">最新壁纸</text>
+      <image class="title-text" src="/widgets/assets/img/xiazaitupian_3.png"></image>
       <image class="title-icon" src="/widgets/assets/img/yanjing.png"></image>
     </div>
 
@@ -55,10 +55,10 @@ export default {
     logoImage: '/widgets/assets/img/logo-1.png',
     bannerImage: '/widgets/assets/img/banner-2.png',
     categoryList: [
-      { name: '动漫', image: '/widgets/assets/img/DONGMAN-1.png' },
-      { name: '人物', image: '/widgets/assets/img/RENWU-1.png' },
-      { name: '萌宠', image: '/widgets/assets/img/CHOONG-1.png' },
-      { name: '自然', image: '/widgets/assets/img/ZIRAN-1.png' }
+      { name: '动漫', image: '/widgets/assets/img/DONGMAN-1.png', nameImage: '/widgets/assets/img/dm-1.png' },
+      { name: '人物', image: '/widgets/assets/img/RENWU-1.png', nameImage: '/widgets/assets/img/rw-1.png' },
+      { name: '萌宠', image: '/widgets/assets/img/CHOONG-1.png', nameImage: '/widgets/assets/img/mc-1.png' },
+      { name: '自然', image: '/widgets/assets/img/ZIRAN-1.png', nameImage: '/widgets/assets/img/zr-1.png' }
     ],
     wallpaperList: [
       {
@@ -374,14 +374,9 @@ export default {
 }
 
 .category-name {
-  font-size: 14px;
-  color: #333333;
-  lines: 1;
-  text-align: center;
   width: 28px;
   height: 14px;
-  font-weight: 900;
-  font-family: sans-serif-black;
+  object-fit: contain;
 }
 
 .title-wrapper {
@@ -392,11 +387,7 @@ export default {
 .title-text {
   width: 64px;
   height: 16px;
-  font-size: 16px;
-  line-height: 16px;
-  letter-spacing: 0px;
-  color: #000000;
-  font-weight: 400;
+  object-fit: contain;
 }
 
 .title-icon {
