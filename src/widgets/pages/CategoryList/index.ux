@@ -104,7 +104,7 @@ export default {
       人物: '/widgets/assets/img/rw-1.png',
       萌宠: '/widgets/assets/img/mc-1.png',
       自然: '/widgets/assets/img/zr-1.png',
-      最新壁纸: '/widgets/assets/img/zuixinbizhi.png'
+      最新壁纸: '/widgets/assets/img/xiazaitupian_3.png'
     }
     this.categoryImage = categoryImageMap[this.categoryName] || ''
   },

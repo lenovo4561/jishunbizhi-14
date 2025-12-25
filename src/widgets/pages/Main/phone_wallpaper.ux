@@ -560,13 +560,13 @@ export default {
 }
 
 .title-text {
-  width: 64px;
-  height: 16px;
+  width: 50px;
+  height: 12px;
   object-fit: contain;
 }
 
 .title-icon {
-  height: 16px;
+  height: 12px;
   object-fit: contain;
   margin-left: 4px;
 }
